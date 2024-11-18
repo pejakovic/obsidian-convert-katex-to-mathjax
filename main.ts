@@ -42,7 +42,7 @@ export default class Katex2LatexConverterPlugin extends Plugin {
       })
     );
 
-    // Command: Paste KaTeX text to LaTeX format
+    // Command: Paste with conversion
     this.addCommand({
       id: "paste-katex-to-latex",
       name: "Paste with Conversion",
@@ -56,7 +56,7 @@ export default class Katex2LatexConverterPlugin extends Plugin {
 
     // Command: Convert existing text in the editor from KaTex to Latex format
     this.addCommand({
-      id: "convert-editor-text-from-katex-to-latex",
+      id: "convert-editor-text-from",
       name: "Convert Editor Text",
       editorCallback: (editor) => {
         const currentText = editor.getValue();
@@ -67,7 +67,7 @@ export default class Katex2LatexConverterPlugin extends Plugin {
 
     // Command: Convert all files in the vault from KaTex to Latex format
     this.addCommand({
-      id: "convert-all-files-from-katex-to-latex",
+      id: "convert-all-files-from",
       name: "Convert All Files",
       callback: async () => {
         const files = this.app.vault.getMarkdownFiles();

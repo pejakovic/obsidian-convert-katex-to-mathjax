@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-convert-katex-to-latex-plugin",
+	"id": "convert-katex-to-latex",
 	"name": "KaTeX to LaTeX",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a plugin for Obsidian (https://obsidian.md) that converts KaTex format to LaTex format",
+	"description": "Converts KaTex format to LaTex format.",
 	"author": "Obsidian",
 	"authorUrl": "https://github.com/pejakovic",
 	"fundingUrl": "",

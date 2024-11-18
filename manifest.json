@@ -3,7 +3,7 @@
 	"name": "KaTeX to LaTeX",
 	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Converts KaTex format to LaTex format.",
+	"description": "Converts KaTeX format to LaTeX format.",
 	"author": "Obsidian",
 	"authorUrl": "https://github.com/pejakovic",
 	"fundingUrl": "",

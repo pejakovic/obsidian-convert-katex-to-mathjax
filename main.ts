@@ -54,7 +54,7 @@ export default class Katex2LatexConverterPlugin extends Plugin {
       },
     });
 
-    // Command: Convert existing text in the editor from KaTex to Latex format
+    // Command: Convert existing text in the editor from KaTex to LaTeX format
     this.addCommand({
       id: "convert-editor-text-from",
       name: "Convert Editor Text",
@@ -65,7 +65,7 @@ export default class Katex2LatexConverterPlugin extends Plugin {
       },
     });
 
-    // Command: Convert all files in the vault from KaTex to Latex format
+    // Command: Convert all files in the vault from KaTex to LaTeX format
     this.addCommand({
       id: "convert-all-files-from",
       name: "Convert All Files",
@@ -93,10 +93,9 @@ function convertKatexToLatex(input: string): string {
   return input
     .replace(/\\\(\s?/g, "$") // Replace `\( ` with `$`
     .replace(/\s?\\\)/g, "$") // Replace ` \)` with `$`
-    .replace(/\\\[\s?/g, "$$$") // Replace `\[ ` with `$$`
-    .replace(/\s?\\\]/g, "$$$"); // Replace ` \]` with `$$`
+    .replace(/\\\[\s?/g, "$$$\n") // Replace `\[ ` with `$$\n`
+    .replace(/\s?\\\]/g, "\n$$$"); // Replace ` \]` with `\n$$`
 }
-
 
 // Settings tab
 class LatexConverterSettingTab extends PluginSettingTab {
@@ -112,7 +111,7 @@ class LatexConverterSettingTab extends PluginSettingTab {
 
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "Latex Converter Settings" });
+    containerEl.createEl("h2", { text: "KaTex to LaTex Converter Settings" });
 
     // Toggle for enabling/disabling default paste conversion
     new Setting(containerEl)

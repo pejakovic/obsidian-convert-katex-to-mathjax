@@ -5,7 +5,7 @@ interface Katex2LatexConverterSettings {
 }
 
 const DEFAULT_SETTINGS: Katex2LatexConverterSettings = {
-  enableDefaultPasteConversion: false,
+  enableDefaultPasteConversion: true,
 };
 
 export default class Katex2LatexConverterPlugin extends Plugin {

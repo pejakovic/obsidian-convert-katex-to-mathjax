@@ -1,7 +1,7 @@
 {
 	"id": "convert-katex-to-latex",
 	"name": "KaTeX to LaTeX",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Converts KaTex format to LaTex format.",
 	"author": "Obsidian",

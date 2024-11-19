@@ -1,6 +1,6 @@
 {
 	"name": "convert-katex-to-mathjax",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"description": "Converts KaTeX format to MathJax format",
 	"main": "main.js",
 	"scripts": {

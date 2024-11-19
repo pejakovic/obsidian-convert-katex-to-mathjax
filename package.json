@@ -1,7 +1,7 @@
 {
-	"name": "convert-katex-to-latex",
+	"name": "convert-katex-to-mathjax",
 	"version": "1.0.1",
-	"description": "Convert KaTex format to LaTex format",
+	"description": "Converts KaTeX format to MathJax format",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

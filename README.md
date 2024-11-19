@@ -1,14 +1,14 @@
-# Obsidian Plugin: Convert KaTeX to LaTeX
+# Obsidian Plugin: Convert KaTeX to MathJax
 
-A simple plugin for [Obsidian](https://obsidian.md) that converts KaTeX notation to LaTeX, ensuring seamless use of mathematical expressions copied from sources like OpenAI's ChatGPT.
+A simple plugin for [Obsidian](https://obsidian.md) that converts KaTeX notation to MathJax, ensuring seamless use of mathematical expressions copied from sources like OpenAI's ChatGPT.
 
 ---
 
 ## **Why This Plugin?**
 
-  ChatGPT and other platforms often render mathematical expressions using [**KaTeX**](https://katex.org), while Obsidian uses [**LaTeX**](https://www.latex-project.org) for mathematical notation. This discrepancy can lead to formatting issues when copying and pasting content.
+  ChatGPT and other platforms often render mathematical expressions using [**KaTeX**](https://katex.org), while Obsidian uses [**MathJax**](https://www.mathjax.org) for mathematical notation. This discrepancy can lead to formatting issues when copying and pasting content.
 
-This plugin eliminates the hassle by automatically converting KaTeX expressions to LaTeX, making it easier to integrate ChatGPT-generated content or other KaTeX-based math into your Obsidian vault.
+This plugin eliminates the hassle by automatically converting KaTeX expressions to MathJax, making it easier to integrate ChatGPT-generated content or other KaTeX-based math into your Obsidian vault.
 
 ---
 
@@ -16,8 +16,8 @@ This plugin eliminates the hassle by automatically converting KaTeX expressions 
 
 - **Default Paste Conversion**: Automatically converts KaTeX expressions on paste (toggleable via settings).
 - **Command Palette Actions**:
-  - **Paste with Conversion**: Manually paste KaTeX content with LaTeX conversion applied.
-  - **Convert Editor Text**: Convert all KaTeX expressions in the current note to LaTeX.
+  - **Paste with Conversion**: Manually paste KaTeX content with MathJax conversion applied.
+  - **Convert Editor Text**: Convert all KaTeX expressions in the current note to MathJax.
   - **Convert All Files**: Batch-convert KaTeX expressions in every markdown file across your vault.
 - Easy toggle to enable or disable automatic conversion.
 - Works seamlessly with clipboard operations.
@@ -27,10 +27,10 @@ This plugin eliminates the hassle by automatically converting KaTeX expressions 
 ## **Installation**
 
 ### **Manual Installation**
-1. Download or build the plugin files (`main.js`, `styles.css`, and `manifest.json`).
+1. Download or build the plugin files (`main.js` and `manifest.json`).
 2. Copy them into your Obsidian vault directory:
    ```
-   VaultFolder/.obsidian/plugins/convert-katex-to-latex/
+   VaultFolder/.obsidian/plugins/obsidian-convert-katex-to-mathjax/
    ```
 3. Restart Obsidian.
 4. Enable the plugin in `Settings > Community Plugins`.
@@ -41,12 +41,12 @@ This plugin eliminates the hassle by automatically converting KaTeX expressions 
 
 ### **Default Paste Behavior**
 1. Enable "Default Paste Conversion" in the plugin settings.
-2. Simply paste copied KaTeX content into your Obsidian editor—it's automatically converted to LaTeX.
+2. Simply paste copied KaTeX content into your Obsidian editor—it's automatically converted to MathJax.
 
 ### **Command Palette Actions**
 Open the Command Palette (`Ctrl + P` / `Cmd + P`) and search for the following commands:
-- **Paste KaTeX to LaTeX**: Pastes clipboard content with conversion applied.
-- **Convert Editor Text**: Converts all KaTeX expressions in the current note to LaTeX.
+- **Paste KaTeX to MathJax**: Pastes clipboard content with conversion applied.
+- **Convert Editor Text**: Converts all KaTeX expressions in the current note to MathJax.
 - **Convert All Files**: Scans and converts KaTeX expressions in all markdown files across your vault.
 
 ---
@@ -56,7 +56,7 @@ Open the Command Palette (`Ctrl + P` / `Cmd + P`) and search for the following c
 If you'd like to make changes or contribute:
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-repo/convert-katex-to-latex.git
+   git clone https://github.com/your-repo/convert-katex-to-mathjax.git
    ```
 2. Ensure your Node.js version is at least 16:
    ```bash

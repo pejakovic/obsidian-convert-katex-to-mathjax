@@ -14,11 +14,11 @@ This plugin eliminates the hassle by automatically converting KaTeX expressions 
 
 ## **Features**
 
-- **Default Paste Conversion**: Automatically converts KaTeX expressions on paste (toggleable via settings).
+- **Default paste conversion**: Automatically converts KaTeX expressions on paste (toggleable via settings).
 - **Command Palette Actions**:
-  - **Paste with Conversion**: Manually paste KaTeX content with MathJax conversion applied.
-  - **Convert Editor Text**: Convert all KaTeX expressions in the current note to MathJax.
-  - **Convert All Files**: Batch-convert KaTeX expressions in every markdown file across your vault.
+  - **Paste with conversion**: Manually paste KaTeX content with MathJax conversion applied.
+  - **Convert current text file**: Convert all KaTeX expressions in the current note to MathJax.
+  - **Convert all files**: Batch-convert KaTeX expressions in every markdown file across your vault.
 - Easy toggle to enable or disable automatic conversion.
 - Works seamlessly with clipboard operations.
 
@@ -40,14 +40,14 @@ This plugin eliminates the hassle by automatically converting KaTeX expressions 
 ## **How to Use**
 
 ### **Default Paste Behavior**
-1. Enable "Default Paste Conversion" in the plugin settings.
+1. Toggle "Enable default paste conversion" in the plugin settings.
 2. Simply paste copied KaTeX content into your Obsidian editor—it's automatically converted to MathJax.
 
 ### **Command Palette Actions**
 Open the Command Palette (`Ctrl + P` / `Cmd + P`) and search for the following commands:
-- **Paste KaTeX to MathJax**: Pastes clipboard content with conversion applied.
-- **Convert Editor Text**: Converts all KaTeX expressions in the current note to MathJax.
-- **Convert All Files**: Scans and converts KaTeX expressions in all markdown files across your vault.
+- **Paste with conversion**: Pastes clipboard content with conversion applied.
+- **Convert current text file**: Converts all KaTeX expressions in the current note to MathJax.
+- **Convert all files**: Scans and converts KaTeX expressions in all markdown files across your vault.
 
 ---
 

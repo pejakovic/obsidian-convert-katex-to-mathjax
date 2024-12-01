@@ -82,24 +82,55 @@ export default class Katex2MathjaxConverterPlugin extends Plugin {
   }
 }
 
-// Helper Function to convert KaTex to MathJax
+/**
+ * Converts KaTeX formatted strings to MathJax formatted strings.
+ * 
+ * This function performs the following conversions:
+ * 1. Replaces \(\text{sample}\) with $\text{sample}$.
+ * 2. Replaces \[\text{sample}\] with $$\text{sample}$$.
+ * 
+ * @param input - The input string containing KaTeX formatted text.
+ * @returns The converted string with MathJax formatted text.
+ */
 function convertKatexToMathJax(input: string): string {
-  return input
-    .replace(/\\\(\s?/g, "$") // Replace `\( ` with `$`
-    .replace(/\s?\\\)/g, "$") // Replace ` \)` with `$`
-    .replace(/\\\[\s?/g, "$$$\n") // Replace `\[ ` with `$$\n`
-    .replace(/\s?\\\]/g, "\n$$$"); // Replace ` \]` with `\n$$`
+  // Replace \(\text{sample}\) with $\text{sample}$
+  input = input.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
+    return `$${p1.trim()}$`;
+  });
+  // Replace \[\text{sample}\] with $$\text{sample}$$
+  input = input.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
+    return `\n$$\n${p1.trim()}\n$$\n`;
+  });
+
+  return input;
 }
 
-// Settings tab
+/**
+ * Settings tab for the MathJax Converter Plugin.
+ * 
+ * This class creates a settings tab in the application where users can
+ * configure the plugin settings.
+ */
 class MathJaxConverterSettingTab extends PluginSettingTab {
   plugin: Katex2MathjaxConverterPlugin;
 
+  /**
+   * Constructs a new instance of the settings tab.
+   * 
+   * @param app - The application instance.
+   * @param plugin - The plugin instance.
+   */
   constructor(app: App, plugin: Katex2MathjaxConverterPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
 
+  /**
+   * Displays the settings tab.
+   * 
+   * This method creates the UI elements for the settings tab and sets up
+   * event listeners for user interactions.
+   */
   display(): void {
     const { containerEl } = this;
 
@@ -107,7 +138,7 @@ class MathJaxConverterSettingTab extends PluginSettingTab {
 
     // Toggle for enabling/disabling default paste conversion
     new Setting(containerEl)
-      .setName("Enable Default Paste Conversion")
+      .setName("Enable default paste conversion")
       .setDesc("Automatically converts KaTeX to MathJax on paste action.")
       .addToggle((toggle) =>
         toggle

@@ -4,7 +4,7 @@
 	"version": "1.0.4",
 	"minAppVersion": "0.15.0",
 	"description": "Converts KaTeX format to MathJax format.",
-	"author": "Obsidian",
+	"author": "Darko Pejakovic",
 	"authorUrl": "https://github.com/pejakovic",
 	"fundingUrl": "",
 	"isDesktopOnly": false

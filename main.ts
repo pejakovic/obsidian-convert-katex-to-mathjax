@@ -28,19 +28,29 @@ export default class Katex2MathjaxConverterPlugin extends Plugin {
 
     // Event for default paste based on the settings 'enableDefaultPasteConversion' value
     this.registerEvent(
-      this.app.workspace.on("editor-paste", async (evt, editor) => {
-        const clipboardText = evt.clipboardData?.getData("text") || ""
-        const convertedText = this.settings.enableDefaultPasteConversion
-          ? convertKatexToMathJax(clipboardText)
-          : clipboardText;
+        this.app.workspace.on("editor-paste", async (evt, editor) => {
+          const clipboardText = evt.clipboardData?.getData("text") || "";
+          const trimmed = clipboardText.trim();
 
-          if (clipboardText) {
+          // Skip entirely if it's a raw URL or markdown link
+          const isRawUrl = /^https?:\/\/\S+$/.test(trimmed);
+          const isMarkdownLink = /^\[.*?\]\(.*?\)$/.test(trimmed);
+
+          // Let Obsidian and other plugins handle it normally
+          if (isRawUrl || isMarkdownLink) {
+            return;
+          }
+
+          // Else, do KaTeX → MathJax conversion
+          if (this.settings.enableDefaultPasteConversion && clipboardText) {
             evt.preventDefault();
+
+            const convertedText = convertKatexToMathJax(clipboardText);
             editor.replaceSelection(convertedText);
           }
-        
-      })
-    );
+        })
+      );
+
 
     // Command: Paste with conversion
     this.addCommand({
@@ -84,25 +94,80 @@ export default class Katex2MathjaxConverterPlugin extends Plugin {
 
 /**
  * Converts KaTeX formatted strings to MathJax formatted strings.
- * 
+ *
  * This function performs the following conversions:
  * 1. Replaces \(\text{sample}\) with $\text{sample}$.
  * 2. Replaces \[\text{sample}\] with $$\text{sample}$$.
- * 
+ * 3. Trims spaces inside inline math expressions.
+ * 4. Skips conversion inside URLs and Markdown links.
+ *
  * @param input - The input string containing KaTeX formatted text.
  * @returns The converted string with MathJax formatted text.
  */
 function convertKatexToMathJax(input: string): string {
-  // Replace \(\text{sample}\) with $\text{sample}$
-  input = input.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
+  const lines = input.split('\n');
+
+  const processedLines = lines.map(line => {
+    const trimmed = line.trim();
+
+    // Skip raw URLs entirely
+    const isRawUrl = /^https?:\/\/[^\s]+$/.test(trimmed);
+
+    // Skip markdown links like [text](url)
+    const isMarkdownLink = /^\[.*?\]\(.*?\)$/.test(trimmed);
+
+    // Skip lines where a URL is followed directly by [title](url) — problematic ones
+    const isDuplicatedMarkdown = /^https?:\/\/[^\s\[]+\[.*?\]\(.*?\)/.test(trimmed);
+
+    if (isRawUrl || isMarkdownLink || isDuplicatedMarkdown) {
+      return line; // Leave it untouched
+    }
+
+    return processMath(line);
+  });
+
+  return processedLines.join('\n');
+}
+// function convertKatexToMathJax(input: string): string {
+//   const lines = input.split('\n');
+//   const processedLines = lines.map(line => {
+//     const isMarkdownLink = /^\[.*?\]\(.*?\)$/.test(line.trim());
+//     const isRawUrl = /^https?:\/\/\S+$/.test(line.trim());
+
+//     if (isMarkdownLink || isRawUrl) {
+//        console.log('Skipping line:', line);
+//       return line; // skip processing
+//     }
+//     console.log('WHAT line:', line);
+//     return processMath(line);
+//   });
+
+//   return processedLines.join('\n');
+// }
+
+/**
+ * Converts \(...\) and \[...\] to $...$ and $$...$$ and trims inside inline math.
+ *
+ * @param text - A plain string to process.
+ * @returns Processed string with math conversions.
+ */
+function processMath(text: string): string {
+  // Convert inline math
+  text = text.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
     return `$${p1.trim()}$`;
   });
-  // Replace \[\text{sample}\] with $$\text{sample}$$
-  input = input.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
+
+  // Convert block math
+  text = text.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
     return `\n$$\n${p1.trim()}\n$$\n`;
   });
 
-  return input;
+  // Trim inline math
+  text = text.replace(/\$ +([^$]+?) +\$/g, (_match, p1) => {
+    return `$${p1.trim()}$`;
+  });
+
+  return text;
 }
 
 /**

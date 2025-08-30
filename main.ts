@@ -51,7 +51,6 @@ export default class Katex2MathjaxConverterPlugin extends Plugin {
         })
       );
 
-
     // Command: Paste with conversion
     this.addCommand({
       id: "paste-katex-to-mathjax",
@@ -105,45 +104,15 @@ export default class Katex2MathjaxConverterPlugin extends Plugin {
  * @returns The converted string with MathJax formatted text.
  */
 function convertKatexToMathJax(input: string): string {
-  const lines = input.split('\n');
+  // Skip full conversion if input is a raw URL or markdown link
+  const isRawUrl = /^https?:\/\/\S+$/.test(input.trim());
+  const isMarkdownLink = /^\[.*?\]\(.*?\)$/.test(input.trim());
+  const isCombined = /^https?:\/\/[^\s\[]+\[.*?\]\(.*?\)/.test(input.trim());
 
-  const processedLines = lines.map(line => {
-    const trimmed = line.trim();
+  if (isRawUrl || isMarkdownLink || isCombined) return input;
 
-    // Skip raw URLs entirely
-    const isRawUrl = /^https?:\/\/[^\s]+$/.test(trimmed);
-
-    // Skip markdown links like [text](url)
-    const isMarkdownLink = /^\[.*?\]\(.*?\)$/.test(trimmed);
-
-    // Skip lines where a URL is followed directly by [title](url) — problematic ones
-    const isDuplicatedMarkdown = /^https?:\/\/[^\s\[]+\[.*?\]\(.*?\)/.test(trimmed);
-
-    if (isRawUrl || isMarkdownLink || isDuplicatedMarkdown) {
-      return line; // Leave it untouched
-    }
-
-    return processMath(line);
-  });
-
-  return processedLines.join('\n');
+  return processMath(input);
 }
-// function convertKatexToMathJax(input: string): string {
-//   const lines = input.split('\n');
-//   const processedLines = lines.map(line => {
-//     const isMarkdownLink = /^\[.*?\]\(.*?\)$/.test(line.trim());
-//     const isRawUrl = /^https?:\/\/\S+$/.test(line.trim());
-
-//     if (isMarkdownLink || isRawUrl) {
-//        console.log('Skipping line:', line);
-//       return line; // skip processing
-//     }
-//     console.log('WHAT line:', line);
-//     return processMath(line);
-//   });
-
-//   return processedLines.join('\n');
-// }
 
 /**
  * Converts \(...\) and \[...\] to $...$ and $$...$$ and trims inside inline math.
@@ -152,18 +121,24 @@ function convertKatexToMathJax(input: string): string {
  * @returns Processed string with math conversions.
  */
 function processMath(text: string): string {
-  // Convert inline math
+  // Convert block math: \[...\] → $$...$$ (multi-line supported)
+// Match square brackets with any content inside, even single-line
+text = text.replace(/\\?\[(.*?)\\?\]/gs, (_match, p1) => {
+  return `\n$$\n${p1.trim()}\n$$\n`;
+});
+  // Convert inline math: \( ... \) → $...$
   text = text.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
     return `$${p1.trim()}$`;
   });
 
-  // Convert block math
-  text = text.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
+  // Match square brackets with any content inside, even single-line
+  text = text.replace(/\\?\[(.*?)\\?\]/gs, (_match, p1) => {
     return `\n$$\n${p1.trim()}\n$$\n`;
   });
 
-  // Trim inline math
-  text = text.replace(/\$ +([^$]+?) +\$/g, (_match, p1) => {
+
+  // Only trim inner contents of $...$ but don't remove outside spacing
+  text = text.replace(/\$(.*?)\$/g, (_match, p1) => {
     return `$${p1.trim()}$`;
   });
 

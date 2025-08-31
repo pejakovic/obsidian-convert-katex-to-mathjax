@@ -104,42 +104,45 @@ export default class Katex2MathjaxConverterPlugin extends Plugin {
  * @returns The converted string with MathJax formatted text.
  */
 function convertKatexToMathJax(input: string): string {
-  // Skip full conversion if input is a raw URL or markdown link
   const isRawUrl = /^https?:\/\/\S+$/.test(input.trim());
   const isMarkdownLink = /^\[.*?\]\(.*?\)$/.test(input.trim());
   const isCombined = /^https?:\/\/[^\s\[]+\[.*?\]\(.*?\)/.test(input.trim());
 
   if (isRawUrl || isMarkdownLink || isCombined) return input;
 
-  return processMath(input);
+  // First, split the input into parts: URLs vs everything else
+  const urlRegex = /https?:\/\/[^\s)]+/g;
+  const parts: string[] = [];
+  let lastIndex = 0;
+
+  for (const match of input.matchAll(urlRegex)) {
+    // Push the non-URL text before this match
+    if (match.index! > lastIndex) {
+      parts.push(processMath(input.slice(lastIndex, match.index)));
+    }
+    // Push the URL itself unchanged
+    parts.push(match[0]);
+    lastIndex = match.index! + match[0].length;
+  }
+
+  // Add the final part
+  if (lastIndex < input.length) {
+    parts.push(processMath(input.slice(lastIndex)));
+  }
+
+  return parts.join('');
 }
 
-/**
- * Converts \(...\) and \[...\] to $...$ and $$...$$ and trims inside inline math.
- *
- * @param text - A plain string to process.
- * @returns Processed string with math conversions.
- */
+
 function processMath(text: string): string {
-  // Convert block math: \[...\] → $$...$$ (multi-line supported)
-// Match square brackets with any content inside, even single-line
-text = text.replace(/\\?\[(.*?)\\?\]/gs, (_match, p1) => {
-  return `\n$$\n${p1.trim()}\n$$\n`;
-});
-  // Convert inline math: \( ... \) → $...$
+  // Convert \( ... \) to $...$
   text = text.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
     return `$${p1.trim()}$`;
   });
 
-  // Match square brackets with any content inside, even single-line
-  text = text.replace(/\\?\[(.*?)\\?\]/gs, (_match, p1) => {
+  // Convert \[ ... \] to $$ ... $$
+  text = text.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
     return `\n$$\n${p1.trim()}\n$$\n`;
-  });
-
-
-  // Only trim inner contents of $...$ but don't remove outside spacing
-  text = text.replace(/\$(.*?)\$/g, (_match, p1) => {
-    return `$${p1.trim()}$`;
   });
 
   return text;

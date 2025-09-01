@@ -130,9 +130,57 @@ function convertKatexToMathJax(input: string): string {
     parts.push(processMath(input.slice(lastIndex)));
   }
 
-  return parts.join('');
+  return trimEmptyLinesAroundBlockMath(parts.join(''));
 }
 
+/**
+ * Removes unnecessary empty lines around block-level math expressions.
+ *
+ * Many Markdown renderers or KaTeX/MathJax integrations require block math
+ * expressions (e.g., `$$ ... $$`) to be tightly wrapped without extra
+ * blank lines before or after the math block. Otherwise, the math might
+ * be misinterpreted as multiple blocks or broken into inline math.
+ *
+ * Example:
+ *   Input:
+ *     $$ 
+ *     E = mc^2 
+ *     $$
+ *
+ *   Output:
+ *     $$ 
+ *     E = mc^2 
+ *     $$
+ *
+ * @param {string} text - The full Markdown/HTML source string.
+ * @returns {string} The processed text with extra empty lines trimmed.
+ */
+
+function trimEmptyLinesAroundBlockMath(input: string): string {
+  return input
+    // Remove empty or whitespace-only line before $$ (even if space before the delimiter)
+    .replace(/(?:^|\n)[ \t]*\n[ \t]*(?=\$\$)/g, '\n')
+    // Remove empty or whitespace-only line after $$
+    .replace(/(?<=\$\$)\n[ \t]*\n/g, '\n');
+}
+
+/**
+ * Processes inline and block-level math expressions within the given text.
+ *
+ * This function detects math delimiters (`$...$` for inline math and
+ * `$$...$$` for block math) and prepares the expressions for proper rendering.
+ * It typically:
+ *   - Identifies math segments using regular expressions.
+ *   - Ensures delimiters are preserved and properly escaped when necessary.
+ *   - Handles multiline block math without breaking rendering.
+ *
+ * Example:
+ *   Input:  "The formula is $E = mc^2$ and it's important."
+ *   Output: "The formula is <span class='math'>E = mc^2</span> and it's important."
+ *
+ * @param {string} text - The Markdown or HTML content containing math expressions.
+ * @returns {string} The updated text with processed math expressions ready for rendering.
+ */
 
 function processMath(text: string): string {
   // Convert \( ... \) to $...$

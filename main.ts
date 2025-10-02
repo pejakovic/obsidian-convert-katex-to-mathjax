@@ -183,18 +183,31 @@ function trimEmptyLinesAroundBlockMath(input: string): string {
  */
 
 function processMath(text: string): string {
-  // Convert \( ... \) to $...$
-  text = text.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
-    return `$${p1.trim()}$`;
-  });
+  // 1) Explicit LaTeX delimiters -> KaTeX
+  // \( ... \)  ->  $...$
+  text = text.replace(/\\\(([\s\S]*?)\\\)/g, (_m, p1) => `$${p1.trim()}$`);
 
-  // Convert \[ ... \] to $$ ... $$
-  text = text.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
-    return `\n$$\n${p1.trim()}\n$$\n`;
-  });
+  // \[ ... \]  ->  $$...$$
+  text = text.replace(/\\\[([\s\S]*?)\\\]/g, (_m, p1) => `\n$$\n${p1.trim()}\n$$\n`);
+
+  // 2) Pretty-copied "bare" delimiters
+  // Block math that’s just [ ... ] on its own line -> $$...$$
+  text = text.replace(
+    /^[ \t]*\[(?:\s*\n)?([\s\S]*?)(?:\n\s*)?\][ \t]*$/gm,
+    (_m, p1) => `\n$$\n${p1.trim()}\n$$\n`
+  );
+
+  // Inline bare (…) -> $…$  ONLY if it contains TeX-y tokens to avoid false positives
+  const inlineTex = /(?<!\\)\(([^()]*?(?:\\[a-zA-Z]+|\\left|\\right|[_^]|\\partial|\\frac|\\sum|\\int)[^()]*)\)/g;
+  text = text.replace(inlineTex, (_m, p1) => `$${p1.trim()}$`);
+
+  // Block bare (…) on its own line with TeX-y tokens -> $$…$$
+  const blockParens = /^[ \t]*\(([\s\S]*?(?:\\[a-zA-Z]+|\\left|\\right|[_^]|\\partial|\\frac|\\sum|\\int)[\s\S]*?)\)[ \t]*$/gm;
+  text = text.replace(blockParens, (_m, p1) => `\n$$\n${p1.trim()}\n$$\n`);
 
   return text;
 }
+
 
 /**
  * Settings tab for the MathJax Converter Plugin.

@@ -183,6 +183,16 @@ function trimEmptyLinesAroundBlockMath(input: string): string {
  */
 
 function processMath(text: string): string {
+  // Convert \( ... \) to $...$
+  text = text.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
+    return `$${p1.trim()}$`;
+  });
+
+  // Convert \[ ... \] to $$ ... $$
+  text = text.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
+    return `\n$$\n${p1.trim()}\n$$\n`;
+  });
+
   // Normalize
   text = text.replace(/\r\n?/g, '\n').replace(/\u200B|\u00A0/g, ' ');
 

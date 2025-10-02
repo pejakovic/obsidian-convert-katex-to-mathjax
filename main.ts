@@ -183,27 +183,26 @@ function trimEmptyLinesAroundBlockMath(input: string): string {
  */
 
 function processMath(text: string): string {
-  // 1) Explicit LaTeX delimiters -> KaTeX
-  // \( ... \)  ->  $...$
-  text = text.replace(/\\\(([\s\S]*?)\\\)/g, (_m, p1) => `$${p1.trim()}$`);
+  // Normalize
+  text = text.replace(/\r\n?/g, '\n').replace(/\u200B|\u00A0/g, ' ');
 
-  // \[ ... \]  ->  $$...$$
-  text = text.replace(/\\\[([\s\S]*?)\\\]/g, (_m, p1) => `\n$$\n${p1.trim()}\n$$\n`);
+  // Inline math
+  text = text.replace(/ \( /g, ' $');                        // open
+  text = text.replace(/ \) /g, '$ ');                        // close with space
+  text = text.replace(/ \)([.,;!?])/g, '$$$1');               // close before punctuation
 
-  // 2) Pretty-copied "bare" delimiters
-  // Block math that’s just [ ... ] on its own line -> $$...$$
+  // Display math: [ ... ] alone on a line -> $$...$$
   text = text.replace(
-    /^[ \t]*\[(?:\s*\n)?([\s\S]*?)(?:\n\s*)?\][ \t]*$/gm,
-    (_m, p1) => `\n$$\n${p1.trim()}\n$$\n`
+    /^\s*\[\s*([\s\S]*?)\s*\]\s*$/gm,
+    (_m, body) => `\n$$\n${body.trim()}\n$$\n`
   );
 
-  // Inline bare (…) -> $…$  ONLY if it contains TeX-y tokens to avoid false positives
-  const inlineTex = /(?<!\\)\(([^()]*?(?:\\[a-zA-Z]+|\\left|\\right|[_^]|\\partial|\\frac|\\sum|\\int)[^()]*)\)/g;
-  text = text.replace(inlineTex, (_m, p1) => `$${p1.trim()}$`);
+  // Punctuation cleanup inside math
+  const tidyInsideMath = (s: string): string =>
+    s.replace(/;/g, '\\;').replace(/(\S),(\S)/g, '$1\\,$2');
 
-  // Block bare (…) on its own line with TeX-y tokens -> $$…$$
-  const blockParens = /^[ \t]*\(([\s\S]*?(?:\\[a-zA-Z]+|\\left|\\right|[_^]|\\partial|\\frac|\\sum|\\int)[\s\S]*?)\)[ \t]*$/gm;
-  text = text.replace(blockParens, (_m, p1) => `\n$$\n${p1.trim()}\n$$\n`);
+  text = text.replace(/\$\$([\s\S]*?)\$\$/g, (_m, b) => `$$${tidyInsideMath(b)}$$`);
+  text = text.replace(/\$([^$]*?)\$/g, (_m, b) => `$${tidyInsideMath(b)}$`);
 
   return text;
 }

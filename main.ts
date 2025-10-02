@@ -183,31 +183,67 @@ function trimEmptyLinesAroundBlockMath(input: string): string {
  */
 
 function processMath(text: string): string {
-  // Convert \( ... \) to $...$
-  text = text.replace(/\\\((.*?)\\\)/g, (_match, p1) => {
-    return `$${p1.trim()}$`;
-  });
-
-  // Convert \[ ... \] to $$ ... $$
-  text = text.replace(/\\\[(.*?)\\\]/gs, (_match, p1) => {
-    return `\n$$\n${p1.trim()}\n$$\n`;
-  });
-
-  // Normalize
+  // 0) Normalize
   text = text.replace(/\r\n?/g, '\n').replace(/\u200B|\u00A0/g, ' ');
 
-  // Inline math
-  text = text.replace(/ \( /g, ' $');                        // open
-  text = text.replace(/ \) /g, '$ ');                        // close with space
-  text = text.replace(/ \)([.,;!?])/g, '$$$1');               // close before punctuation
+  // 1) Explicit LaTeX delimiters -> KaTeX
+  text = text.replace(/\\\(([\s\S]*?)\\\)/g, (_m, p1) => `$${p1.trim()}$`);
+  text = text.replace(/\\\[([\s\S]*?)\\\]/g, (_m, p1) => `\n$$\n${p1.trim()}\n$$\n`);
 
-  // Display math: [ ... ] alone on a line -> $$...$$
-  text = text.replace(
-    /^\s*\[\s*([\s\S]*?)\s*\]\s*$/gm,
-    (_m, body) => `\n$$\n${body.trim()}\n$$\n`
-  );
+  // 2) Display math: [ ... ] on its own line -> $$...$$
+  text = text.replace(/^\s*\[\s*([\s\S]*?)\s*\]\s*$/gm, (_m, body) => `\n$$\n${body.trim()}\n$$\n`);
 
-  // Punctuation cleanup inside math
+  // 3) Inline math — whitespace style
+  text = text.replace(/ \( /g, ' $');           // open
+  text = text.replace(/ \) /g, '$ ');           // close with space
+  text = text.replace(/ \)([.,;!?])/g, '$$$1'); // close before punctuation ($ + punct)
+
+  // 4) Inline math — tight parens with TeX-y or function-like content (outside existing math)
+  type Seg = { kind: 'text'|'blockMath'; s: string };
+  const splitByBlock = (s: string): Seg[] => {
+    const out: Seg[] = [];
+    const re = /\$\$[\s\S]*?\$\$/g;
+    let i = 0, m: RegExpExecArray | null;
+    while ((m = re.exec(s))) {
+      if (m.index > i) out.push({ kind: 'text', s: s.slice(i, m.index) });
+      out.push({ kind: 'blockMath', s: m[0] });
+      i = m.index + m[0].length;
+    }
+    if (i < s.length) out.push({ kind: 'text', s: s.slice(i) });
+    return out;
+  };
+
+  type SubSeg = { kind: 'text'|'inlineMath'; s: string };
+  const splitByInline = (s: string): SubSeg[] => {
+    const out: SubSeg[] = [];
+    const re = /\$[^$]*?\$/g;
+    let i = 0, m: RegExpExecArray | null;
+    while ((m = re.exec(s))) {
+      if (m.index > i) out.push({ kind: 'text', s: s.slice(i, m.index) });
+      out.push({ kind: 'inlineMath', s: m[0] });
+      i = m.index + m[0]!.length;
+    }
+    if (i < s.length) out.push({ kind: 'text', s: s.slice(i) });
+    return out;
+  };
+
+  const TEXY = /\\[a-zA-Z]+|[_^]|\{[^}]*\}/;      // \commands, superscripts/subscripts, or {...}
+  const FUNCTIONY = /\b[A-Za-z]\s*\([^()]*\)/;    // y(x), u(x,t), X(x)T(t) (will be inside body)
+  const tightParensNested = /\(((?:[^()]|\([^()]*\))*)\)/g; // allow one level of inner (...)
+
+  const convertTightOutsideMath = (s: string): string =>
+    splitByInline(s).map(part => {
+      if (part.kind !== 'text') return part.s;
+      return part.s.replace(tightParensNested, (_m, body) =>
+        (TEXY.test(body) || FUNCTIONY.test(body)) ? `$${body}$` : `(${body})`
+      );
+    }).join('');
+
+  text = splitByBlock(text).map(seg =>
+    seg.kind === 'blockMath' ? seg.s : convertTightOutsideMath(seg.s)
+  ).join('');
+
+  // 5) Punctuation cleanup inside math
   const tidyInsideMath = (s: string): string =>
     s.replace(/;/g, '\\;').replace(/(\S),(\S)/g, '$1\\,$2');
 
@@ -216,6 +252,7 @@ function processMath(text: string): string {
 
   return text;
 }
+
 
 
 /**
